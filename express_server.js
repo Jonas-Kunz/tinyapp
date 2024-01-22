@@ -16,7 +16,14 @@ app.get("/", (req, res) => {
 app.get("/urls", (req, res) => {
   const templateVars = { urls: urlDatabase};
   res.render("urls_index", templateVars)
-})
+});
+
+app.get("/urls/:id", (req, res) => {
+  const shortUrl = req.params.id;
+  const longUrl = urlDatabase[shortUrl];
+  const templateVars = { shortUrl, longUrl };
+  res.render("urls_show", templateVars);
+});
 
 app.get("/urls.json", (req, res) => {
   res.json(urlDatabase)
