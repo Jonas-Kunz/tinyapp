@@ -1,57 +1,55 @@
 const express = require("express");
+const cookieParser = require("cookie-parser");
 const app = express();
 const PORT = 8080; // default port
+//mock URL database
+const urlDatabase = {
+  "b2xVn2": "http://www.lighthouselabs.ca",
+  "9sm5xK": "http://www.google.com"
+};
 // crappy key generator: just loops six time and selects arandom character.
-function generateRandomString() {
+const generateRandomString = function () {
   let chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890"
   let randString = "";
   for (let i = 0; i < 6; i++) {
     randString += chars[Math.floor(Math.random() * (62 - 0) + 0)]
   }
   return randString
-};
-
+};    
 // sets app to use ejs as its view engine
 app.set("view engine", "ejs");
-// mock data base to hold urls
-
 // translates forms to readable stuff
 app.use(express.urlencoded({ extended: true }));
+// set cookie parser
+app.use(cookieParser());
 
-const urlDatabase = {
-  "b2xVn2": "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com"
-};
-                
+
 //gets for various paths
 app.get("/", (req, res) => {
   // res.send("Hello!");
   res.redirect("/urls");
 });
-/////gets
+
 app.get("/urls", (req, res) => {
+  const username = req.cookies["username"];
   const shortURL = req.params.id;
-  const templateVars = { urls: urlDatabase, shortURL};
+  const templateVars = { urls: urlDatabase, shortURL, username};
   res.render("urls_index", templateVars)
 });
 
 app.get("/urls/new", (req, res) => {
-  res.render("urls_new");
+  const username = req.cookies["username"];
+  const templateVars = { username }
+  res.render("urls_new", templateVars);
 });
 
 // seriously dont forget about [] notation it helps to break down stuff in understandable variables
 app.get("/urls/:id", (req, res) => {
+  const username = req.cookies["username"];
   const shortURL = req.params.id;
   const longURL = urlDatabase[shortURL];
-  const templateVars = { shortURL, longURL };
+  const templateVars = { shortURL, longURL, username };
   res.render("urls_show", templateVars);
-});
-
-app.post("/urls", (req, res) => {
-  let longURL = req.body.longURL
-  let newID = generateRandomString();
-  urlDatabase[newID] = longURL;
-  res.redirect(`/urls/${newID}`);
 });
 
 app.get("/u/:id", (req, res) => {
@@ -73,6 +71,13 @@ app.post("/login", (req,res) => {
   let username = req.body.username;
   res.cookie("username",`${username}`);
   res.redirect("/urls")
+});
+
+app.post("/urls", (req, res) => {
+  let longURL = req.body.longURL
+  let newID = generateRandomString();
+  urlDatabase[newID] = longURL;
+  res.redirect(`/urls/${newID}`);
 });
 
 app.post("/urls/:id/delete", (req,res) => {

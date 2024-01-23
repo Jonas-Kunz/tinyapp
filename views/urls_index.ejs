@@ -23,6 +23,7 @@
       <table class="table">
         <thead>
           <tr>
+            <!-- sets table headers -->
             <th scope="col">Short URL ID</th>
             <th scope="col">Long URL</th> 
             <th scope="col">Edit</th>
@@ -30,11 +31,13 @@
           </tr>
         </thead>
         <tbody>
+          <!-- loops through url database and makes entry in table for each key: value -->
           <% for (let id in urls) { %>
             <tr>
               <td><%= id%></td>
               <td><%= urls[id] %></td>
               <td>
+                <!-- buddens -->
                 <form method="POST" action="/urls/<%= id %>/EDIT">
                   <button type="submit" value="submit" class="btn btn-outline-primary">Edit</button>   
                 </form> 
