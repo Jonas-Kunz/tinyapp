@@ -23,7 +23,8 @@ app.use(express.urlencoded({ extended: true }));
 
 //gets for various paths
 app.get("/", (req, res) => {
-  res.send("Hello!");
+  // res.send("Hello!");
+  res.redirect("/urls");
 });
 
 app.get("/urls", (req, res) => {
