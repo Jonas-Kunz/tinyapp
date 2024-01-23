@@ -1,10 +1,17 @@
 const express = require("express");
 const app = express();
 const PORT = 8080; // default port
+// crappy key generator: just loops six time and selects arandom character.
 function generateRandomString() {
-  
+  let chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890"
+  let randString = "";
+  for (let i = 0; i < 6; i++) {
+    randString += chars[Math.floor(Math.random() * (62 - 0) + 0)]
+  }
+  return randString
 }
 
+console.log(generateRandomString());
 
 // sets app to use ejs as its view engine
 app.set("view engine", "ejs");
