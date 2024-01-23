@@ -28,7 +28,7 @@ app.get("/", (req, res) => {
   // res.send("Hello!");
   res.redirect("/urls");
 });
-
+/////gets
 app.get("/urls", (req, res) => {
   const shortURL = req.params.id;
   const templateVars = { urls: urlDatabase, shortURL};
@@ -39,13 +39,6 @@ app.get("/urls/new", (req, res) => {
   res.render("urls_new");
 });
 
-app.post("/urls", (req, res) => {
-  let longURL = req.body.longURL
-  let newID = generateRandomString();
-  urlDatabase[newID] = longURL;
-  res.redirect(`/urls/${newID}`);
-});
-
 // seriously dont forget about [] notation it helps to break down stuff in understandable variables
 app.get("/urls/:id", (req, res) => {
   const shortURL = req.params.id;
@@ -54,6 +47,28 @@ app.get("/urls/:id", (req, res) => {
   res.render("urls_show", templateVars);
 });
 
+app.post("/urls", (req, res) => {
+  let longURL = req.body.longURL
+  let newID = generateRandomString();
+  urlDatabase[newID] = longURL;
+  res.redirect(`/urls/${newID}`);
+});
+
+app.get("/u/:id", (req, res) => {
+  const id = req.params.id;
+  const longURL = urlDatabase[id] 
+  res.redirect(longURL);
+});
+
+app.get("/urls.json", (req, res) => {
+  res.json(urlDatabase)
+});
+
+app.get("/hello", (req, res) => {
+  res.send("<html><body>Hello <b>World</b></body></html>\n")
+});
+
+//////posts
 app.post("/urls/:id/delete", (req,res) => {
   const shortURL = req.params.id;
   delete urlDatabase[shortURL];
@@ -73,21 +88,8 @@ app.post("/urls/EDIT/:shortURL", (req,res) => {
   urlDatabase[id] = newURL
   res.redirect("/urls");
 })
-/////////////////////////////////
-app.get("/u/:id", (req, res) => {
-  const id = req.params.id;
-  const longURL = urlDatabase[id] 
-  res.redirect(longURL);
-});
 
-app.get("/urls.json", (req, res) => {
-  res.json(urlDatabase)
-});
-
-app.get("/hello", (req, res) => {
-  res.send("<html><body>Hello <b>World</b></body></html>\n")
-});
-
+///listen
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
