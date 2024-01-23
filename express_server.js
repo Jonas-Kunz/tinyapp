@@ -69,6 +69,9 @@ app.get("/hello", (req, res) => {
 //////posts
 app.post("/login", (req,res) => {
   let username = req.body.username;
+  if (username.length <= 0) {
+    res.redirect("/urls");
+  };
   res.cookie("username",`${username}`);
   res.redirect("/urls")
 });
