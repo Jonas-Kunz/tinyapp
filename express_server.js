@@ -14,13 +14,15 @@ function generateRandomString() {
 // sets app to use ejs as its view engine
 app.set("view engine", "ejs");
 // mock data base to hold urls
+
+// translates forms to readable stuff
+app.use(express.urlencoded({ extended: true }));
+
 const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
   "9sm5xK": "http://www.google.com"
 };
-
-app.use(express.urlencoded({ extended: true }));
-
+                
 //gets for various paths
 app.get("/", (req, res) => {
   // res.send("Hello!");
@@ -28,7 +30,8 @@ app.get("/", (req, res) => {
 });
 
 app.get("/urls", (req, res) => {
-  const templateVars = { urls: urlDatabase};
+  const shortURL = req.params.id;
+  const templateVars = { urls: urlDatabase, shortURL};
   res.render("urls_index", templateVars)
 });
 
@@ -37,7 +40,6 @@ app.get("/urls/new", (req, res) => {
 });
 
 app.post("/urls", (req, res) => {
-  console.log(req.body); // Log the POST request body to the console
   let longURL = req.body.longURL
   let newID = generateRandomString();
   urlDatabase[newID] = longURL;
@@ -53,11 +55,25 @@ app.get("/urls/:id", (req, res) => {
 });
 
 app.post("/urls/:id/delete", (req,res) => {
-  const shortURL =req.params.id;
+  const shortURL = req.params.id;
   delete urlDatabase[shortURL];
   res.redirect("/urls")
-})
+});
 
+// catches the urls/:id/EDIT action from urls_index.ejs and redirects to the show page for that id at line 37
+app.post("/urls/:id/EDIT", (req,res) => {
+  const shortURL = req.params.id
+  res.redirect(`/urls/${shortURL}`);
+});
+
+// yeets a post at the url and replaces the urlDatabse entry at that id with what you filled in on  the edit form in url_show.ejs at line 25
+app.post("/urls/EDIT/:shortURL", (req,res) => {
+  let newURL = req.body.newURL;
+  let id = req.params.shortURL;
+  urlDatabase[id] = newURL
+  res.redirect("/urls");
+})
+/////////////////////////////////
 app.get("/u/:id", (req, res) => {
   const id = req.params.id;
   const longURL = urlDatabase[id] 
