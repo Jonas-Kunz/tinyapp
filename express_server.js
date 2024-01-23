@@ -69,6 +69,12 @@ app.get("/hello", (req, res) => {
 });
 
 //////posts
+app.post("/login", (req,res) => {
+  let username = req.body.username;
+  res.cookie("username",`${username}`);
+  res.redirect("/urls")
+});
+
 app.post("/urls/:id/delete", (req,res) => {
   const shortURL = req.params.id;
   delete urlDatabase[shortURL];
@@ -91,5 +97,5 @@ app.post("/urls/EDIT/:shortURL", (req,res) => {
 
 ///listen
 app.listen(PORT, () => {
-  console.log(`Example app listening on port ${PORT}!`);
+  console.log(`Express_server listening on Port: ${PORT}!`);
 });
