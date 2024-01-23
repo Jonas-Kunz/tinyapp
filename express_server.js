@@ -73,6 +73,12 @@ app.post("/login", (req,res) => {
   res.redirect("/urls")
 });
 
+app.post("/logout", (req,res) => {
+  let username = req.body.username;
+  res.clearCookie("username", `${username}`);
+  res.redirect("/urls")
+});
+
 app.post("/urls", (req, res) => {
   let longURL = req.body.longURL
   let newID = generateRandomString();
