@@ -5,9 +5,16 @@ const app = express();
 const PORT = 8080; // default port
 //mock URL database
 const urlDatabase = {
-  b2xVn2: "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com",
+  b6UTxQ: {
+    longURL: "https://www.tsn.ca",
+    userID: "aJ48lW",
+  },
+  i3BoGr: {
+    longURL: "https://www.google.ca",
+    userID: "aJ48lW",
+  },
 };
+
 // mock user database"
 const users = {
   userRandomID: {
@@ -34,8 +41,8 @@ const generateRandomString = function () {
 const findUser = function (email) {
   for (let user in users) {
     if (users[user].email === email) {
-      const userObj = users[user]
-      return userObj
+      const userObj = users[user];
+      return userObj;
     }
   }
   return null;
@@ -68,7 +75,7 @@ app.get("/urls", (req, res) => {
 // if we want to creat a new url
 app.get("/urls/new", (req, res) => {
   let id = req.cookies["user_id"];
-  const user = users[id]
+  const user = users[id];
   const templateVars = { user };
   res.render("urls_new", templateVars);
 });
@@ -76,22 +83,22 @@ app.get("/urls/new", (req, res) => {
 // seriously dont forget about [] notation it helps to break down stuff in understandable variables
 app.get("/urls/:id", (req, res) => {
   let id = req.cookies["user_id"];
-  const user = users[id]
+  const user = users[id];
   const shortURL = req.params.id;
-  const longURL = urlDatabase[shortURL];
+  const longURL = urlDatabase[shortURL].longURL;
   const templateVars = { shortURL, longURL, user };
   res.render("urls_show", templateVars);
 });
 // redirect to the original long url
 app.get("/u/:id", (req, res) => {
   const id = req.params.id;
-  const longURL = urlDatabase[id];
+  const longURL = urlDatabase[id].longURL;
   res.redirect(longURL);
 });
 // handles people wanting to go to register page
 app.get("/register", (req, res) => {
   let id = req.cookies["user_id"];
-  const user = users[id]
+  const user = users[id];
   const templateVars = { user };
   res.render("register", templateVars);
 });
@@ -121,9 +128,14 @@ app.post("/logout", (req, res) => {
 });
 // basic make an URL and add to database
 app.post("/urls", (req, res) => {
-  let longURL = req.body.longURL;
-  let newID = generateRandomString();
-  urlDatabase[newID] = longURL;
+  const id = req.cookies["user_id"];
+  const longURLnew = req.body.longURL;
+  const newID = generateRandomString();
+  // adds new object to database
+  urlDatabase[`${newID}`] = {
+    longURL: longURLnew,
+    userID: id
+  };
   res.redirect(`/urls/${newID}`);
 });
 // deletes a URL
@@ -149,17 +161,22 @@ app.post("/urls/EDIT/:shortURL", (req, res) => {
 
 // registration post
 app.post("/register", (req, res) => {
-  const id = req.cookies["user_id"]
+  const id = req.cookies["user_id"];
   // console.log("id: ", id);
   const userInfo = {
     email: req.body.email,
     psw: req.body.password,
     psw_re: req.body.password_repeat,
   };
+
+  if (!userInfo.email || !userInfo.psw) {
+    res.status(400).send("Email or password cannot be empty");
+  }
+
   // generates a user object if it doesnt already exist and redirects us to the registration page if it does
   const genUser = function (email, psw) {
     if (findUser(email)) {
-      res.status(400).send('Email already in use');
+      res.status(400).send("Email already in use");
       return res.redirect("/register");
     }
     return {
@@ -173,15 +190,10 @@ app.post("/register", (req, res) => {
     res.redirect("/register");
   }
 
-  if (!userInfo.email || !userInfo.psw) {
-    res.status(400).send("Email or password cannot be empty")
-  };
-
   const user = genUser(userInfo.email, userInfo.psw);
 
-  
-  users[user.id] = user; 
- 
+  users[user.id] = user;
+
   // console.log("users:", users);
   // console.log("USER email: ", users[user.id].email);
   res.cookie("user_id", user.id);
