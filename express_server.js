@@ -58,6 +58,12 @@ app.get("/u/:id", (req, res) => {
   res.redirect(longURL);
 });
 
+app.get("/register", (req,res) => {
+  const username = req.cookies["username"];
+  const templateVars = { username}
+  res.render("register", templateVars)
+})
+
 app.get("/urls.json", (req, res) => {
   res.json(urlDatabase)
 });
@@ -71,6 +77,7 @@ app.post("/login", (req,res) => {
   let username = req.body.username;
   if (username.length <= 0) {
     res.redirect("/urls");
+    return;
   };
   res.cookie("username",`${username}`);
   res.redirect("/urls")
