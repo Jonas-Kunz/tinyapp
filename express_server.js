@@ -159,7 +159,7 @@ app.post("/register", (req, res) => {
   // generates a user object if it doesnt already exist and redirects us to the registration page if it does
   const genUser = function (email, psw) {
     if (findUser(email)) {
-      console.log("User Tried to Register Taken Email");
+      res.status(400).send('Email already in use');
       return res.redirect("/register");
     }
     return {
@@ -172,7 +172,11 @@ app.post("/register", (req, res) => {
   if (userInfo.psw !== userInfo.psw_re) {
     res.redirect("/register");
   }
-  
+
+  if (!userInfo.email || !userInfo.psw) {
+    res.status(400).send("Email or password cannot be empty")
+  };
+
   const user = genUser(userInfo.email, userInfo.psw);
 
   
