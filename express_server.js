@@ -7,6 +7,20 @@ const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
   "9sm5xK": "http://www.google.com"
 };
+// mock user database"
+const users = {
+  userRandomID: {
+    id: "userRandomID",
+    email: "user@example.com",
+    password: "purple-monkey-dinosaur",
+  },
+  user2RandomID: {
+    id: "user2RandomID",
+    email: "user2@example.com",
+    password: "dishwasher-funk",
+  },
+};
+
 // crappy key generator: just loops six time and selects arandom character.
 const generateRandomString = function () {
   let chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890"
@@ -15,7 +29,8 @@ const generateRandomString = function () {
     randString += chars[Math.floor(Math.random() * (62 - 0) + 0)]
   }
   return randString
-};    
+};  
+
 // sets app to use ejs as its view engine
 app.set("view engine", "ejs");
 // translates forms to readable stuff
@@ -31,24 +46,28 @@ app.get("/", (req, res) => {
 });
 
 app.get("/urls", (req, res) => {
-  const username = req.cookies["username"];
+  const cookie = req.cookies["user_id"];
+  const user = users[cookie];
   const shortURL = req.params.id;
-  const templateVars = { urls: urlDatabase, shortURL, username};
+  const templateVars = { urls: urlDatabase, shortURL, user};
+ 
   res.render("urls_index", templateVars)
 });
 
 app.get("/urls/new", (req, res) => {
-  const username = req.cookies["username"];
-  const templateVars = { username }
+  const cookie = req.cookies["user_id"];
+  const user = users[cookie];
+  const templateVars = { user }
   res.render("urls_new", templateVars);
 });
 
 // seriously dont forget about [] notation it helps to break down stuff in understandable variables
 app.get("/urls/:id", (req, res) => {
-  const username = req.cookies["username"];
+  const cookie = req.cookies["user_id"];
+  const user = users[cookie];
   const shortURL = req.params.id;
   const longURL = urlDatabase[shortURL];
-  const templateVars = { shortURL, longURL, username };
+  const templateVars = { shortURL, longURL, user };
   res.render("urls_show", templateVars);
 });
 
@@ -59,8 +78,9 @@ app.get("/u/:id", (req, res) => {
 });
 
 app.get("/register", (req,res) => {
-  const username = req.cookies["username"];
-  const templateVars = { username}
+  const cookie = req.cookies["user_id"];
+  const user = users[cookie];
+  const templateVars = { user }
   res.render("register", templateVars)
 })
 
@@ -113,6 +133,29 @@ app.post("/urls/EDIT/:shortURL", (req,res) => {
   let id = req.params.shortURL;
   urlDatabase[id] = newURL
   res.redirect("/urls");
+});
+
+// registration post
+app.post("/register", (req,res) => {
+  const formVars = {
+    email: req.body.email,
+    psw: req.body.password,
+    psw_re: req.body.password_repeat
+  };
+
+  if (formVars.psw !== formVars.psw_re) {
+    res.redirect("/register")
+  };
+
+  const randID = generateRandomString();
+  res.cookie("user_id", `${randID}`);
+  users[randID] = {
+    id: randID,
+    email: formVars.email,
+    psw: formVars.psw
+  };
+  console.log(users[randID]);
+  res.redirect("/urls")
 })
 
 ///listen
