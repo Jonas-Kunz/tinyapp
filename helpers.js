@@ -1,4 +1,6 @@
-const { users, urlDatabase } = require("./database")
+
+const bcrypt = require("bcryptjs");
+
 // I know this is not optimal, i just didnt want to copy the stackoverflow solution
 const generateRandomString = function () {
   let chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890";
@@ -29,10 +31,19 @@ const urlsForUser = function (id,urlDatabase) {
   return userUrls;
 };
 
-const checkURL = function(URLID) {
+const checkURL = function(URLID, urlDatabase) {
   return URLID in urlDatabase;
 }
 
+const authenticateUser = function (password, userObj) {
+  if (userObj) {
+    if(bcrypt.compareSync(password, userObj.password)) {
+      return true;
+    }
+    return false
+  }
+  return false
+};
 
 
-module.exports = { generateRandomString, findUser, urlsForUser, checkURL };
+module.exports = { generateRandomString, findUser, urlsForUser, checkURL, authenticateUser };

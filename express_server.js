@@ -1,5 +1,5 @@
 const express = require("express");
-const { generateRandomString, findUser, urlsForUser, checkURL} = require("./helpers");
+const { generateRandomString, findUser, urlsForUser, checkURL, authenticateUser} = require("./helpers");
 const { users, urlDatabase } = require("./database")
 const cookieSession = require('cookie-session')
 const bcrypt = require("bcryptjs");
@@ -53,7 +53,7 @@ app.get("/urls/:id",  (req, res) => {
   const user = users[id];
   const URLID = req.params.id;
   const shortURL = req.params.id;
-  const check = checkURL(URLID)
+  const check = checkURL(URLID, urlDatabase);
   const shortVars = { shortURL, URLID, user, check }
   if(!check) {
     return res.render("urls_show", shortVars) 
@@ -110,23 +110,15 @@ app.post("/login", (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
   const userObj = findUser(email,users);
+  console.log(userObj);
 
-  const authenticateUser = function (password, userObj) {
-    // console.log(userObj);
-    if (userObj !== null) {
-      // console.log(userObj.password);
-      if(bcrypt.compareSync(password, userObj.password)) {
-        // return console.log("Pass");
-        req.session.user_id = userObj.id;
-        return res.redirect("/urls")
-      }
-      return res.status(403).send("Please Enter Valid Email And Password")
-    }
-    return res.status(403).send("Please Enter Valid Email And Password") 
+  if (!authenticateUser(password,userObj)) {
+    return res.send("<p> 403 Please Enter A Valid Email or Adress")
+  } else {
+    req.session.user_id = userObj.id;
+    res.redirect("/urls")
   };
-
-  authenticateUser(password,userObj);
-
+  
 });
 
 // logout botton
@@ -205,9 +197,10 @@ app.post("/register", (req, res) => {
   if (!userInfo.email || !userInfo.psw) {
     return res.status(400).send("Email or password cannot be empty");
   };
-
-  if (findUser(userInfo.email)) {
-    return res.status(400).send("Email already in use");
+  console.log(userInfo.email, " user Email");
+  if (findUser(userInfo.email, users)) {
+    console.log("arg");
+    return res.status(400).send("<p>Email already in use</p>");
   };
 
   // generates a user object if it doesnt already exist and redirects us to the registration page if it does
@@ -223,7 +216,7 @@ app.post("/register", (req, res) => {
     password: bcrypt.hashSync(userInfo.psw, 10),
   };
   console.log(users);
-  req.session.user_id = `${newID}`
+  req.session.user_id = newID
   res.redirect("/urls");
 
 });
