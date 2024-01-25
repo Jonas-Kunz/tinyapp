@@ -2,6 +2,7 @@ const express = require("express");
 const { generateRandomString, findUser, urlsForUser, checkURL} = require("./helpers");
 const { users, urlDatabase } = require("./database")
 const cookieParser = require("cookie-parser");
+const bcrypt = require("bcryptjs");
 // const functionCaller = require("./helpers")
 const app = express();
 const PORT = 8080; // default port
@@ -108,7 +109,7 @@ app.post("/login", (req, res) => {
     // console.log(userObj);
     if (userObj !== null) {
       // console.log(userObj.password);
-      if(userObj.password === password) {
+      if(bcrypt.compareSync(password, userObj.password)) {
         // return console.log("Pass");
         res.cookie("user_id", userObj.id);
         return res.redirect("/urls")
@@ -188,6 +189,7 @@ app.post("/urls/EDIT/:shortURL", (req, res) => {
 app.post("/register", (req, res) => {
   //forgot what i had this here for
   // const id = req.cookies["user_id"];
+
   const userInfo = {
     email: req.body.email,
     psw: req.body.password,
@@ -212,9 +214,9 @@ app.post("/register", (req, res) => {
   users[newID] = {
     id: newID,
     email: userInfo.email,
-    password: userInfo.psw,
+    password: bcrypt.hashSync(userInfo.psw, 10),
   };
-
+  console.log(users);
   res.cookie("user_id", newID);
   res.redirect("/urls");
 
