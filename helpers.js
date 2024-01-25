@@ -1,5 +1,5 @@
 const { users, urlDatabase } = require("./database")
-
+// I know this is not optimal, i just didnt want to copy the stackoverflow solution
 const generateRandomString = function () {
   let chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890";
   let randString = "";
@@ -9,7 +9,7 @@ const generateRandomString = function () {
   return randString;
 };
 
-const findUser = function (email) {
+const findUser = function (email, users) {
   for (let user in users) {
     if (users[user].email === email) {
       const userObj = users[user]
@@ -19,7 +19,7 @@ const findUser = function (email) {
   return null;
 };
 
-const urlsForUser = function (id) {
+const urlsForUser = function (id,urlDatabase) {
   const userUrls = {};
   for (let shortURL in urlDatabase) {
     if (urlDatabase[shortURL].userID === id) {

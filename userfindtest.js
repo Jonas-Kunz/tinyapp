@@ -56,6 +56,16 @@ const checkURL = function(URLID) {
   return URLID in urlDatabase;
 }
 
-console.log(checkURL('i3BoGr'));
+const urlsForUser = function (id,urlDatabase) {
+  const userUrls = {};
+  for (let shortURL in urlDatabase) {
+    if (urlDatabase[shortURL].userID === id) {
+      userUrls[shortURL] = urlDatabase[shortURL];
+    }
+  }
+  return userUrls;
+};
+
+console.log(urlsForUser("aJ48lW", urlDatabase));
 
 

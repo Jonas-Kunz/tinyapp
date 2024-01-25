@@ -1,10 +1,8 @@
 const express = require("express");
 const { generateRandomString, findUser, urlsForUser, checkURL} = require("./helpers");
 const { users, urlDatabase } = require("./database")
-const cookieParser = require("cookie-parser");
 const cookieSession = require('cookie-session')
 const bcrypt = require("bcryptjs");
-// const functionCaller = require("./helpers")
 const app = express();
 const PORT = 8080; // default port
 
@@ -13,9 +11,7 @@ const PORT = 8080; // default port
 app.set("view engine", "ejs");
 // translates forms to readable stuff
 app.use(express.urlencoded({ extended: true }));
-// set cookie parser
-app.use(cookieParser());
-
+// set session parser
 app.use(cookieSession({
   name: "user_id",
   keys: ["ARGHAHAQADAS!@#$%!#$!@#!$!@#","GORSHDOGNABBIT"],
@@ -33,7 +29,7 @@ app.get("/urls", (req, res) => {
   const id = req.session.user_id;
   const user = users[id];
   const shortURL = req.params.id;
-  urls = urlsForUser(id);
+  urls = urlsForUser(id,urlDatabase);
   const templateVars = { urls, shortURL, user };
   res.render("urls_index", templateVars);
 });
@@ -113,7 +109,7 @@ app.get("/login", (req, res) => {
 app.post("/login", (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
-  const userObj = findUser(email);
+  const userObj = findUser(email,users);
 
   const authenticateUser = function (password, userObj) {
     // console.log(userObj);
