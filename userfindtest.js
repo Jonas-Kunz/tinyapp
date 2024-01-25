@@ -16,6 +16,17 @@ const users = {
   }
 };
 
+const urlDatabase = {
+  b6UTxQ: {
+    longURL: "https://www.tsn.ca",
+    userID: "aJ48lW",
+  },
+  i3BoGr: {
+    longURL: "https://www.google.ca",
+    userID: "aJ48lW",
+  },
+};
+
 
 const findUser = function (email) {
   for (let user in users) {
@@ -41,6 +52,10 @@ const authenticateUser = function (password, userObj) {
   return res.status(403).send("Please Enter Valid Email And Password") 
 };
 
-authenticateUser('dog@dog.com', "cat")
+const checkURL = function(URLID) {
+  return URLID in urlDatabase;
+}
+
+console.log(checkURL('i3BoGr'));
 
 

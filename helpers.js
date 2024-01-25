@@ -29,6 +29,10 @@ const urlsForUser = function (id) {
   return userUrls;
 };
 
+const checkURL = function(URLID) {
+  return URLID in urlDatabase;
+}
 
 
-module.exports = { generateRandomString, findUser, urlsForUser };
+
+module.exports = { generateRandomString, findUser, urlsForUser, checkURL };

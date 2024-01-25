@@ -1,5 +1,5 @@
 const express = require("express");
-const { generateRandomString, findUser, urlsForUser} = require("./helpers");
+const { generateRandomString, findUser, urlsForUser, checkURL} = require("./helpers");
 const { users, urlDatabase } = require("./database")
 const cookieParser = require("cookie-parser");
 // const functionCaller = require("./helpers")
@@ -34,6 +34,9 @@ app.get("/urls", (req, res) => {
 app.get("/urls/new", (req, res) => {
   const id = req.cookies["user_id"];
   const user = users[id];
+  if (!user) {
+    res.redirect("/urls");
+  };
   const templateVars = { user };
   res.render("urls_new", templateVars);
 });
@@ -44,9 +47,15 @@ app.get("/urls/new", (req, res) => {
 app.get("/urls/:id",  (req, res) => {
   const id = req.cookies["user_id"];
   const user = users[id];
+  const URLID = req.params.id;
   const shortURL = req.params.id;
+  const check = checkURL
+  const shortVars = { shortURL, URLID, user, check }
+  if(!checkURL(`${URLID}`)) {
+    return res.render("urls_show", shortVars) 
+  }
   const longURL = urlDatabase[shortURL].longURL;
-  const templateVars = {shortURL, longURL, user };
+  const templateVars = {shortURL, longURL, user, URLID };
   res.render("urls_show", templateVars);
 });
 
@@ -60,8 +69,10 @@ app.get("/u/:id", (req, res) => {
 // handles people wanting to go to register page
 app.get("/register", (req, res) => {
   const id = req.cookies["user_id"];
-  console.log("users at reg:", users);
   const user = users[id];
+  if(user) {
+    res.redirect("/urls");
+  };
   const templateVars = { user };
   res.render("register", templateVars);
 });
@@ -78,6 +89,9 @@ app.get("/hello", (req, res) => {
 app.get("/login", (req, res) => {
   const id = req.cookies["user_id"];
   const user = users[id];
+  if(user) {
+    res.redirect("/urls");
+  };
   templateVars = { user };
   res.render("login", templateVars);
 });
@@ -117,6 +131,9 @@ app.post("/logout", (req, res) => {
 // basic make an URL and add to database
 app.post("/urls", (req, res) => {
   const id = req.cookies["user_id"];
+  if(!id) {
+    return res.send("Please Login or Register")
+  }
   const longURLnew = req.body.longURL;
   const newID = generateRandomString();
   // adds new object to database
