@@ -49,13 +49,13 @@ app.get("/urls/:id",  (req, res) => {
   const user = users[id];
   const URLID = req.params.id;
   const shortURL = req.params.id;
-  const check = checkURL
+  const check = checkURL(URLID)
   const shortVars = { shortURL, URLID, user, check }
-  if(!checkURL(`${URLID}`)) {
+  if(!check) {
     return res.render("urls_show", shortVars) 
   }
   const longURL = urlDatabase[shortURL].longURL;
-  const templateVars = {shortURL, longURL, user, URLID };
+  const templateVars = {shortURL, longURL, user, URLID, check };
   res.render("urls_show", templateVars);
 });
 
@@ -146,14 +146,29 @@ app.post("/urls", (req, res) => {
 
 // deletes a URL
 app.post("/urls/:id/delete", (req, res) => {
+  const id = req.cookies["user_id"];
   const shortURL = req.params.id;
+  if (!id) {
+    console.log("user tried to delet id without login or without owning id");
+    return res.send("Cannot delete Id if not logged in or if pilfering others ids")
+  };
+  if (!shortURL) {
+    console.log("User Tried deleting nonexistant id");
+    return res.send("/id Does Not Exist")
+  };
+
   delete urlDatabase[shortURL];
   res.redirect("/urls");
 });
 
 // catches the urls/:id/EDIT action from urls_index.ejs and redirects to the show page for that id at line 37
 app.post("/urls/:id/EDIT", (req, res) => {
+  const id = req.cookies["user_id"];
   const shortURL = req.params.id;
+  if (!id) {
+    console.log("Cannot edit unowned IDs");
+    return res.send("Cannot edit unowned ids")
+  };
   res.redirect(`/urls/${shortURL}`);
 });
 
