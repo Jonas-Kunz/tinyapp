@@ -2,6 +2,7 @@ const express = require("express");
 const { generateRandomString, findUser, urlsForUser, checkURL} = require("./helpers");
 const { users, urlDatabase } = require("./database")
 const cookieParser = require("cookie-parser");
+const cookieSession = require('cookie-session')
 const bcrypt = require("bcryptjs");
 // const functionCaller = require("./helpers")
 const app = express();
@@ -15,6 +16,12 @@ app.use(express.urlencoded({ extended: true }));
 // set cookie parser
 app.use(cookieParser());
 
+app.use(cookieSession({
+  name: "user_id",
+  keys: ["ARGHAHAQADAS!@#$%!#$!@#!$!@#","GORSHDOGNABBIT"],
+  maxAge: 24 * 60 * 60 * 1000
+}))
+
 //gets for various paths
 app.get("/", (req, res) => {
   // res.send("Hello!");
@@ -23,7 +30,7 @@ app.get("/", (req, res) => {
 
 // takes us to the main page
 app.get("/urls", (req, res) => {
-  const id = req.cookies["user_id"];
+  const id = req.session.user_id;
   const user = users[id];
   const shortURL = req.params.id;
   urls = urlsForUser(id);
@@ -33,7 +40,7 @@ app.get("/urls", (req, res) => {
 
 // if we want to creat a new url
 app.get("/urls/new", (req, res) => {
-  const id = req.cookies["user_id"];
+  const id = req.session.user_id;
   const user = users[id];
   if (!user) {
     res.redirect("/urls");
@@ -46,7 +53,7 @@ app.get("/urls/new", (req, res) => {
 // seriously dont forget about [] notation it helps to break down stuff in understandable variables
 
 app.get("/urls/:id",  (req, res) => {
-  const id = req.cookies["user_id"];
+  const id = req.session.user_id;
   const user = users[id];
   const URLID = req.params.id;
   const shortURL = req.params.id;
@@ -62,14 +69,17 @@ app.get("/urls/:id",  (req, res) => {
 
 // redirect to the original long url
 app.get("/u/:id", (req, res) => {
-  const id = req.params.id;
-  const longURL = urlDatabase[id].longURL;
+  const id = req.session.user_id;
+  // console.log("REQ BOD: ",req.params);
+  // console.log(id);
+  // console.log(urlDatabase);
+  const longURL = urlDatabase[req.params.id].longURL;
   res.redirect(longURL);
 });
 
 // handles people wanting to go to register page
 app.get("/register", (req, res) => {
-  const id = req.cookies["user_id"];
+  const id = req.session.user_id;
   const user = users[id];
   if(user) {
     res.redirect("/urls");
@@ -88,7 +98,7 @@ app.get("/hello", (req, res) => {
 
 // login
 app.get("/login", (req, res) => {
-  const id = req.cookies["user_id"];
+  const id = req.session.user_id;
   const user = users[id];
   if(user) {
     res.redirect("/urls");
@@ -111,7 +121,7 @@ app.post("/login", (req, res) => {
       // console.log(userObj.password);
       if(bcrypt.compareSync(password, userObj.password)) {
         // return console.log("Pass");
-        res.cookie("user_id", userObj.id);
+        req.session.user_id = userObj.id;
         return res.redirect("/urls")
       }
       return res.status(403).send("Please Enter Valid Email And Password")
@@ -125,13 +135,13 @@ app.post("/login", (req, res) => {
 
 // logout botton
 app.post("/logout", (req, res) => {
-  res.clearCookie("user_id");
+  req.session = null;
   res.redirect("/login");
 });
 
 // basic make an URL and add to database
 app.post("/urls", (req, res) => {
-  const id = req.cookies["user_id"];
+  const id = req.session.user_id;
   if(!id) {
     return res.send("Please Login or Register")
   }
@@ -147,7 +157,7 @@ app.post("/urls", (req, res) => {
 
 // deletes a URL
 app.post("/urls/:id/delete", (req, res) => {
-  const id = req.cookies["user_id"];
+  const id = req.session.user_id;
   const shortURL = req.params.id;
   if (!id) {
     console.log("user tried to delet id without login or without owning id");
@@ -164,7 +174,7 @@ app.post("/urls/:id/delete", (req, res) => {
 
 // catches the urls/:id/EDIT action from urls_index.ejs and redirects to the show page for that id at line 37
 app.post("/urls/:id/EDIT", (req, res) => {
-  const id = req.cookies["user_id"];
+  const id = req.session.user_id;
   const shortURL = req.params.id;
   if (!id) {
     console.log("Cannot edit unowned IDs");
@@ -175,7 +185,7 @@ app.post("/urls/:id/EDIT", (req, res) => {
 
 // yeets a post at the url and replaces the urlDatabse entry at that id with what you filled in on  the edit form in url_show.ejs at line 25
 app.post("/urls/EDIT/:shortURL", (req, res) => {
-  const id = req.cookies["user_id"];
+  const id = req.session.user_id;
   const newURL = req.body.newURL;
   const urlid = req.params.shortURL;
   urlDatabase[urlid] = {
@@ -217,7 +227,7 @@ app.post("/register", (req, res) => {
     password: bcrypt.hashSync(userInfo.psw, 10),
   };
   console.log(users);
-  res.cookie("user_id", newID);
+  req.session.user_id = `${newID}`
   res.redirect("/urls");
 
 });
