@@ -11,6 +11,8 @@ const PORT = 8080; // default port
 app.set("view engine", "ejs");
 // translates forms to readable stuff
 app.use(express.urlencoded({ extended: true }));
+
+app.use(express.json());
 // set session parser
 app.use(cookieSession({
   name: "user_id",
