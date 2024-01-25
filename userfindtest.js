@@ -9,6 +9,11 @@ const users = {
     email: "user2@example.com",
     password: "dishwasher-funk",
   },
+  '6pGNzw': { 
+    id: '6pGNzw', 
+    email: 'dog@dog.com', 
+    psw: 'cat' 
+  }
 };
 
 
@@ -22,9 +27,6 @@ const findUser = function (email) {
   return null;
 };
 
-if (findUser("user2@example.com")) {
-  console.log("found user");
-}
-
+console.log(findUser('dog@om'));
 
 

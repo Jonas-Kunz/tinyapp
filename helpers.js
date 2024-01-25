@@ -1,3 +1,4 @@
+const { users, urlDatabase } = require("./database")
 
 const generateRandomString = function () {
   let chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890";
@@ -11,37 +12,21 @@ const generateRandomString = function () {
 const findUser = function (email) {
   for (let user in users) {
     if (users[user].email === email) {
-      return true
+      const userObj = users[user]
+      return userObj
     }
-    return false;
   }
+  return null;
 };
 
-const genUser = function (email, password,) {
-  if (findUser(email)) {
-    return res.redirect("/register")
+const urlsForUser = function (id) {
+  const userUrls = {};
+  for (let shortURL in urlDatabase) {
+    if (urlDatabase[shortURL].userID === id) {
+      userUrls[shortURL] = urlDatabase[shortURL];
+    }
   }
-  return {
-    id: generateRandomString(),
-    email: userInfo.email,
-    psw: userInfo.psw,
-  };
+  return userUrls;
 };
 
-const urlDatabase = {
-  b6UTxQ: {
-    longURL: "https://www.tsn.ca",
-    userID: "aJ48lW",
-  },
-  i3BoGr: {
-    longURL: "https://www.google.ca",
-    userID: "aJ48lW",
-  },
-};
-
-urlDatabase.asdad = {
-  longURL: "ass",
-  userID: "123"
-}
-console.log(urlDatabase);
-
+module.exports = { generateRandomString, findUser, urlsForUser };
