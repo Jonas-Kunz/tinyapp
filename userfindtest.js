@@ -12,7 +12,7 @@ const users = {
   '6pGNzw': { 
     id: '6pGNzw', 
     email: 'dog@dog.com', 
-    psw: 'cat' 
+    password: 'cat' 
   }
 };
 
@@ -27,6 +27,20 @@ const findUser = function (email) {
   return null;
 };
 
-console.log(findUser('dog@om'));
+const authenticateUser = function (password, userObj) {
+  // console.log(userObj);
+  if (userObj !== null) {
+    // console.log(userObj.password);
+    if(userObj.password === password) {
+      // return console.log("Pass");
+      res.cookie("user_id", userObj.id);
+      return res.redirect("/urls")
+    }
+    return res.status(403).send("Please Enter Valid Email And Password")
+  }
+  return res.status(403).send("Please Enter Valid Email And Password") 
+};
+
+authenticateUser('dog@dog.com', "cat")
 
 
