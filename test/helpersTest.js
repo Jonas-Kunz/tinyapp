@@ -58,7 +58,6 @@ describe("generateRandomString", function () {
 describe("urlsForUser", function () {
   it("should return only urls that have a user id equal to users id", function () {
     const actualObject = urlsForUser("aJ48lW", testUrlDatabase);
-    console.log(actualObject);
     const expectedObject = {
       b6UTxQ: {
         longURL: "https://www.tsn.ca",
