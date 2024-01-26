@@ -36,7 +36,6 @@ const checkURL = function(URLID, urlDatabase) {
 }
 
 const authenticateUser = function (password, userObj) {
-  
   if (userObj) {
     if(bcrypt.compareSync(password, userObj.password)) {
       return true;
